@@ -141,9 +141,7 @@ JSON is the more practical choice for modern web APIs, but XML still has useful 
 ![XML by ID screenshot](docs/postman/xml_by_id.png)
 
 
-
 ------------------------------------------------------------------------------------------------------------------------------
-
 
 
 ## **Assignment 2:**
