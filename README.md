@@ -1,8 +1,150 @@
 # Football Shop
 
+## `**Assignment 3:**`
+
+> **Note:** This section contains my work for Assignment 3.  
+> The original Assignment 2 answers follows after the horizontal line.
+
 **Deployed Application:** [https://roben-joseph-footballshop.pbp.cs.ui.ac.id]
 
 ---
+
+## 1. Why do we need data delivery in implementing a platform?
+
+Data delivery (exposing application data as machine-readable formats such as JSON or XML) is essential because it makes an application **composable, automatable, and reusable**:
+
+   - It lets different clients consume the same backend: web pages, single-page apps, mobile apps, other services, or third-party tools can all use the same endpoints.  
+   - Data delivery enables integrations, automation, and scaling: analytics systems, external services, or other teams can consume data without relying on the UI.  
+   - Practically, this means we can build a web UI now, and later a mobile app or partner integration without changing the core backend.
+
+---
+
+## 2. XML vs JSON — which is better? Why is JSON more popular?
+
+JSON is the more practical choice for modern web APIs, but XML still has useful features in certain domains.
+
+**Why JSON is generally preferred**
+   - **Lightweight and concise.** JSON payloads are smaller and easier to scan than equivalent XML.  
+   - **Native mapping to JavaScript objects.** Web apps (and many tools) can parse JSON directly into usable objects (`JSON.parse()`), which speeds development.  
+   - **Cleaner syntax.** No closing tag verbosity; easier to read and write.  
+   - **Ecosystem and tooling.** Modern web frameworks and libraries expect or generate JSON by default.
+
+**When XML is still useful**
+   - XML supports attributes, mixed content, namespaces, and formal schema validation. These strengths make XML suitable for document-centric or some enterprise systems (e.g., legacy integrations, complex document formats).
+
+**Conclusion:** For REST-style APIs and most web/mobile needs, JSON’s simplicity and native integration with JavaScript make it the better default. The course slides provide comparison context and historical reasons behind JSON’s rise.
+
+---
+
+## 3. What does `is_valid()` do in Django forms, and why do we need it?
+
+`is_valid()` performs validation and cleaning of form input:
+
+   - When you call `form.is_valid()` Django:
+   - Runs each field’s validators (required flags, type checks, custom validators).
+   - Converts and cleans raw input into Python types and stores them into `form.cleaned_data`.
+   - Populates `form.errors` if validation fails and returns `False`.
+   - Returns `True` when all validation checks pass.
+
+**Why this matters**
+   - It prevents invalid or malicious data from being saved into the database.
+   - It centralizes validation logic (field validators, `clean_<field>()`, and `clean()`).
+   - Always call `is_valid()` before using `form.cleaned_data` or calling `form.save()`.
+
+---
+
+## 4. Why do we need `{% csrf_token %}` in Django forms? What happens without it?
+
+**What CSRF protection prevents**
+   - CSRF (Cross-Site Request Forgery) protects authenticated users from unwanted actions triggered by third-party pages.  
+   - If a user is logged into `example.com`, a malicious page could cause the browser to submit a POST request to `example.com` (using the user's cookies), performing actions on their behalf. unless the server verifies the request's origin.
+
+**How Django defends**
+   - Django includes `CsrfViewMiddleware` by default and expects every POST form to include a token generated per user session.
+   - In templates, we add `{% csrf_token %}` inside `<form method="post">` so the token goes into the POST body and Django can verify it.
+
+**What happens if we don't include CSRF protection**
+   - Attackers can craft hidden forms or image requests that force the victim’s browser to perform state-changing actions (create/delete/update).  
+   - Example exploit: a malicious page auto-submits a form to `example.com/transfer/` making the victim unknowingly transfer funds or change their account settings.
+
+**Mitigations beyond `{% csrf_token %}`**
+   - Keep `CsrfViewMiddleware` enabled (default).
+   - For AJAX, send the token in a header (example: `X-CSRFToken`) or use fetch/fetch wrappers that include it.
+   - Use `SameSite` cookie settings to further reduce cross-site request risk.
+
+---
+
+## 5. How I implemented the checklist — step-by-step (not just following the tutorial)
+
+### A — Summary of what I added:
+1. **Four data endpoints** to return products in XML and JSON:
+   - `/api/products/json/` → all products (JSON)
+   - `/api/products/xml/` → all products (XML)
+   - `/api/products/json/<id>/` → single product by id (JSON)
+   - `/api/products/xml/<id>/` → single product by id (XML)
+
+2. **HTML pages**:
+   - A **product list** page showing all products with an **Add** button and a **Detail** link for each product.
+   - A **product add** page with a form to create new products.
+   - A **product detail** page that displays one product’s data.
+
+3. **Form**:
+   - A `ProductForm` (`main/forms.py`) implemented as a **ModelForm** for easy validation and saving.
+
+4. **Routing**:
+   - URL patterns added to `main/urls.py` for both the HTML pages and the API endpoints.
+   - Project `football_shop/urls.py` includes the `main` app’s URLs.
+
+5. **Validation & security**:
+   - The add form uses `form.is_valid()` to validate inputs before saving.
+   - Templates use `{% csrf_token %}` to protect POST requests.
+
+### B — Files I created or edited:
+   - `main/forms.py` — `ProductForm` (ModelForm)
+   - `main/views.py` — added:
+   - `api_products_json`, `api_products_xml`, `api_product_json`, `api_product_xml` (these use `django.core.serializers.serialize()` to return XML/JSON)
+   - `product_list`, `product_detail`, `product_add` (HTML views)
+   - `main/urls.py` — added routes for API + pages
+   - `main/templates/main/product_list.html` - shows list + Add + Detail links
+   - `main/templates/main/product_form.html` — form to add product (includes `{% csrf_token %}`)
+   - `main/templates/main/product_detail.html` — display single product details
+
+### C — Implementation notes & small decisions:
+   - I used **Django serializers** (`serializers.serialize("json", queryset)`) for consistent, simple JSON/XML output. This is quick for small projects and ensures field names match model fields.
+   - For the HTML add form, I used `ModelForm` from the 2nd tutorial so validation and saving are straightforward.
+
+---
+
+## Feedback for Tutorial 2
+   
+   Overall the tutorial was very useful and practical, the hands-on exercises helped me understand forms and basic API endpoints. I think it woulb be way better if:
+
+      - Add a short troubleshooting checklist for common deployment problems (requirements.txt placement, branch mismatch on PWS, Procfile basics).
+      - A quick demo showing the same action performed via a Django form and via a JSON API (Postman) would make the conceptual difference clearer for us.
+
+---
+
+## Postman Testing & Screenshots
+
+### JSON list
+![JSON list screenshot](docs/postman/json_list.png)
+
+### XML list
+![XML list screenshot](docs/postman/xml_list.png)
+
+### JSON by ID
+![JSON by ID screenshot](docs/postman/json_by_id.png)
+
+### XML by ID
+![XML by ID screenshot](docs/postman/xml_by_id.png)
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+
+## `**Assignment 2:**`
 
 ## 1. Step-by-Step Implementation
 
