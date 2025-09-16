@@ -1,11 +1,13 @@
 # Football Shop
 
-## `**Assignment 3:**`
+**Deployed Application:** [https://roben-joseph-footballshop.pbp.cs.ui.ac.id]
+
+---
+
+## **Assignment 3:**
 
 > **Note:** This section contains my work for Assignment 3.  
-> The original Assignment 2 answers follows after the horizontal line.
-
-**Deployed Application:** [https://roben-joseph-footballshop.pbp.cs.ui.ac.id]
+> The original Assignment 2 answers follows after the the assignment 3.
 
 ---
 
@@ -19,7 +21,7 @@ Data delivery (exposing application data as machine-readable formats such as JSO
 
 ---
 
-## 2. XML vs JSON — which is better? Why is JSON more popular?
+## 2. XML vs JSON - Which is better? Why is JSON more popular?
 
 JSON is the more practical choice for modern web APIs, but XML still has useful features in certain domains.
 
@@ -117,7 +119,7 @@ JSON is the more practical choice for modern web APIs, but XML still has useful 
 
 ## Feedback for Tutorial 2
    
-   Overall the tutorial was very useful and practical, the hands-on exercises helped me understand forms and basic API endpoints. I think it woulb be way better if:
+   Overall the tutorial was very useful and practical, the hands-on exercises helped me understand forms and basic API endpoints. I think it would be way better if:
 
       - Add a short troubleshooting checklist for common deployment problems (requirements.txt placement, branch mismatch on PWS, Procfile basics).
       - A quick demo showing the same action performed via a Django form and via a JSON API (Postman) would make the conceptual difference clearer for us.
@@ -144,7 +146,12 @@ JSON is the more practical choice for modern web APIs, but XML still has useful 
 
 
 
-## `**Assignment 2:**`
+## **Assignment 2:**
+
+> **Note:** This section contains my work for Assignment 2.  
+> The Assignment 3 answers are abvailable above.
+
+---
 
 ## 1. Step-by-Step Implementation
 
