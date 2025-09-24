@@ -1,11 +1,174 @@
 # Football Shop
 
-## `**Assignment 3:**`
+**Deployed Application:** [https://roben-joseph-footballshop.pbp.cs.ui.ac.id]
+
+---
+
+# **Assignment 4:**
+
+> **Note:** This section contains my work for Assignment 4.  
+> The original Assignment 2 and 3 answers follows after the the assignment 4.
+
+---
+
+## 1. What is Django's `AuthenticationForm`? Explain its advantages and disadvantages.
+
+AuthenticationForm is a built-in Django form (in django.contrib.auth.forms) that handles username/password login validation and integrates with Django’s authentication helpers (authenticate() or login()).
+
+How it works (brief):
+
+   - It exposes username and password fields.
+   - When instantiated with request data and validated (form.is_valid()), it checks credentials and sets form.get_user() to the authenticated User instance (or returns errors if invalid/inactive).
+
+Advantages:
+
+   - Fast to use: you can add login in minutes without writing field validation.
+   - Integrates with Django auth: works out-of-the-box with authenticate() and login().
+   - Secure defaults: uses Django’s auth back-end and standard error handling.
+
+Disadvantages:
+
+   - Basic fields only: only supports username/password out of the box (not email login, 2FA, or extra fields).
+   - UI not provided: you must write templates/HTML for the form.
+   - Customization requires subclassing: to change validation, labels, error messages, or to add fields you must subclass or wrap it.
+
+---
+
+## 2. What is the difference between authentication and authorization? How does Django implement the two concepts?
+
+Authentication (AuthN) (Who are you?):
+
+   - Purpose: Verify identity (login).
+   - Example: You enter username + password and the system confirms you are user `roben`.
+
+Authorization (AuthZ) (What are you allowed to do?):
+
+   - Purpose: Control access to resources and actions.
+   - Example: Does `roben` have permission to delete a product or access the admin page?
+
+How Django implements them:
+
+Authentication: `django.contrib.auth` provides the `User` model, authentication backends, `authenticate()` to check credentials, and `login()` to create a session for a user. `AuthenticationForm` helps collect credentials and `request.user` gives the current authenticated user in views/templates.
+
+Authorization: Django has:
+   - `User.is_staff` and `User.is_superuser` flags.
+   - Permissions (model-level and custom) and `user.has_perm('app_label.permission_name')`.
+   - Groups to bundle permissions.
+   - Decorators / mixins such as `@login_required`, `@permission_required`, and `PermissionRequiredMixin` for class-based views.
+
+---
+
+## 3. What are the benefits and drawbacks of using sessions and cookies in storing the state of a web application?
+
+a. Cookies (client-side small pieces of data):
+
+Benefits:
+   - Persist small pieces of info across requests (e.g., theme, language).
+   - Automatic: browsers send cookies with each request to the domain.
+   - Simple to read/write from server or client (JS).
+
+Drawbacks:
+   - Size limit (4KB) and limited number per domain.
+   - Stored client-side (can be read or tampered with if not protected).
+   - Exposing sensitive data in cookies is insecure.
+
+b. Sessions (server-side state + small session id cookie):
+
+Benefits:
+   - Store larger, sensitive state safely on server (user profile, cart, auth state).
+   - Only a session id is kept client-side (cookie). Server controls content.
+   - Flexible: Django supports DB, cache, or external stores (Redis) for sessions.
+   - Easier to revoke server-side (delete session record).
+
+Drawbacks:
+   - Requires server-side storage and management (more memory/ops).
+   - If you run multiple app servers you need a shared session store.
+   - Server-side storage adds complexity for scaling and session cleanup.
+   - Stateless (RESTful) APIs often prefer token-based approaches.
+
+---
+
+## 4. In web development, is the usage of cookies secure by default, or is there any potential risk that we should be aware of? How does Django handle this problem?
+
+Are cookies secure by default?
+No. Cookies are not secure by default. They can be stolen or misused unless configured correctly.
+
+Main risks:
+   - XSS (Cross-Site Scripting): attacker-run JavaScript can read cookies accessible to JS.
+   - MITM (Man in the Middle): cookies sent over HTTP can be intercepted.
+   - CSRF (Cross-Site Request Forgery): attacker tricks browser to send authenticated requests.
+   - Session fixation: attacker forces victim to use a known session id.
+
+How Django helps / recommended settings:
+   - `SESSION_COOKIE_HTTPONLY` = `True` --> prevents JS from reading the session cookie (mitigates XSS).
+   - `SESSION_COOKIE_SECURE` = `True` —-> cookie only sent over HTTPS (prevents MITM on HTTP).
+   - `SESSION_COOKIE_SAMESITE` = `'Lax'` or `'Strict'` —-> reduces cross-site requests that include cookies (helps against CSRF).
+   - `CSRF` protection (middleware + `{% csrf_token %}` in forms) —-> defends against CSRF attacks.
+   - `login()` rotates session keys (cycle session) —-> helps mitigate session fixation.
+   - Use `CSRF_COOKIE_SECURE = True` and `SECURE_BROWSER_XSS_FILTER`, `X_FRAME_OPTIONS` and other security settings in production.
+
+---
+
+## 5. Step-by-step: How I implemented the checklist?
+
+#### Precondition (environment):
+   I activated the project’s virtual environment (`.env`) using `source .env/bin/activate` and installed Django. This ensures the project runs in isolation.
+
+#### Step 1 (Connect Product to User):
+   In `main/models.py`, I defined a single `Product` model and added a `user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)` field. This links products to their authors.  
+
+   I then ran `python3 manage.py makemigrations` and `python3 manage.py migrate`. This fixed earlier errors where two `Product` classes existed.
+
+#### Step 2 (Create ProductForm):
+   In `main/forms.py`, I created a `ProductForm` that includes only valid fields (`name`, `price`, `description`, `thumbnail`, `category`, `is_featured`). This solved issues where the form referenced missing fields.
+
+#### Step 3 (Register, Login, and Logout (with cookies)):
+   - **Register:** Used Django’s `UserCreationForm`. After registration, users are redirected to login.  
+   - **Login:** Used `AuthenticationForm` and Django’s `login()`. On success, I set a `last_login` cookie to record login time.  
+   - **Logout:** Called `logout()` and deleted the `last_login` cookie.  
+
+   This integrates with Django sessions securely while also meeting assignment requirements.
+
+#### Step 4 (Protect pages with `login_required`):
+   I decorated views such as `show_main` with `@login_required(login_url="/login")`. This redirects unauthenticated users to the login page. In `show_main`, the context includes `username`, the list of `products`, and `last_login`.
+
+#### Step 5 (Link created objects to the logged-in user):
+   When saving a product, I used `form.save(commit=False)`, attached `request.user` as the product’s author, then saved it. This ensures products are always tied to the user who created them.
+
+#### Step 6 (Update templates):
+   - In `main.html`, I added filter buttons (All Products / My Products) and displayed product details along with their authors.  
+   - In `product_detail.html`, I displayed the product’s author or “Anonymous” if no user is linked.  
+   - In `login.html` and `register.html`, I ensured `{% csrf_token %}` is present inside forms for CSRF protection.
+
+#### Step 7 (Create dummy data):
+   Using the Django shell (`python3 manage.py shell`), I created two users and gave each three products. This satisfied the assignment requirement.
+
+#### Step 8 (Run and verify):
+   I started the server with `python3 manage.py runserver`.  
+   - If not logged in, I was redirected to the login page.  
+   - After logging in, the homepage displayed my username and last login time.  
+   - I confirmed in browser dev tools that `sessionid` and `last_login` cookies were set.
+
+#### Step 9 (Optional tests):
+   Django supports functional tests with Selenium. Running `python manage.py test` would execute them, though setup is required.
+
+#### Step 10 (Security reminders):
+   In `settings.py`, I configured secure cookie settings:  
+      - `SESSION_COOKIE_HTTPONLY = True`  
+      - `SESSION_COOKIE_SAMESITE = "Lax"`  
+      - `CSRF_COOKIE_SAMESITE = "Lax"`  
+      - In production: `SESSION_COOKIE_SECURE = True` and `CSRF_COOKIE_SECURE = True`  
+
+#### Step 11 (Push to GitHub):
+I staged, committed, and pushed changes with:  
+`git add .`, `git commit -m "Assignment 4: auth (register/login/logout), product-user link, last_login cookie, templates"`, and `git push origin master`.
+
+---
+
+# **Assignment 3:**
 
 > **Note:** This section contains my work for Assignment 3.  
-> The original Assignment 2 answers follows after the horizontal line.
-
-**Deployed Application:** [https://roben-joseph-footballshop.pbp.cs.ui.ac.id]
+> The original Assignment 2 answers follows after the the assignment 3.
 
 ---
 
@@ -19,7 +182,7 @@ Data delivery (exposing application data as machine-readable formats such as JSO
 
 ---
 
-## 2. XML vs JSON — which is better? Why is JSON more popular?
+## 2. XML vs JSON - Which is better? Why is JSON more popular?
 
 JSON is the more practical choice for modern web APIs, but XML still has useful features in certain domains.
 
@@ -117,7 +280,7 @@ JSON is the more practical choice for modern web APIs, but XML still has useful 
 
 ## Feedback for Tutorial 2
    
-   Overall the tutorial was very useful and practical, the hands-on exercises helped me understand forms and basic API endpoints. I think it woulb be way better if:
+   Overall the tutorial was very useful and practical, the hands-on exercises helped me understand forms and basic API endpoints. I think it would be way better if:
 
       - Add a short troubleshooting checklist for common deployment problems (requirements.txt placement, branch mismatch on PWS, Procfile basics).
       - A quick demo showing the same action performed via a Django form and via a JSON API (Postman) would make the conceptual difference clearer for us.
@@ -139,12 +302,15 @@ JSON is the more practical choice for modern web APIs, but XML still has useful 
 ![XML by ID screenshot](docs/postman/xml_by_id.png)
 
 
-
-------------------------------------------------------------------------------------------------------------------------------
-
+---
 
 
-## `**Assignment 2:**`
+# **Assignment 2:**
+
+> **Note:** This section contains my work for Assignment 2.  
+> The Assignment 3 answers are abvailable above.
+
+---
 
 ## 1. Step-by-Step Implementation
 
