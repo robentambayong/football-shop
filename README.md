@@ -4,6 +4,128 @@
 
 ---
 
+# **Assignment 5:**
+
+> **Note:** This section contains my work for Assignment 5.  
+> The original Assignment 2, 3, and 4 answers follows after the the assignment 5.
+
+---
+
+## 1. CSS Selector Priority: If multiple CSS selectors target an HTML element, explain the priority order for CSS selector selection.
+
+When multiple CSS rules match the same element, browsers decide using **specificity and source order**.  
+
+**Order of priority (highest → lowest):**
+1. `!important` rules  
+2. Inline styles (`style=""`)  
+3. ID selectors (`#id`)  
+4. Class, attribute, pseudo-class selectors (`.btn`, `[type=text]`, `:hover`)  
+5. Element and pseudo-element selectors (`div`, `p`, `::before`)  
+If two have the same specificity, the **last one in code** wins.  
+
+---
+
+## 2. Responsive Design:
+
+Why is responsive design important in web application development?
+
+Responsive design makes a website automatically adjust its layout, images, and components so it works well on any device size (phone, tablet, laptop, or large monitor).
+
+   Why it matters:
+
+- Better user experience: Visitors don’t need to zoom or scroll awkwardly; everything fits their screen.
+- SEO benefits: Search engines like Google rank mobile-friendly sites higher.
+- Future-proofing: New devices (foldables, tablets, wide screens) can display the site without building a separate version.
+- Easier maintenance: One responsive codebase instead of managing separate desktop and mobile websites.
+
+Examples + Explanation:
+
+- Good implementations (Nike, Adidas, Amazon):
+   - Nike and Adidas use flexible image grids that shrink or expand depending on screen size.
+   - Amazon adjusts menus into hamburger icons on mobile and optimizes product listings into one-column scroll.
+   - The result is smooth shopping whether on a big desktop monitor or a small phone.
+
+- Poor implementation (Older Craigslist, some government sites):
+   - Craigslist’s old design looks the same on desktop and mobile, forcing users to zoom and scroll horizontally.
+   - Text and buttons are tiny, making navigation frustrating.
+   - This shows the risk of not using responsive design: the site feels outdated and hard to use.
+
+---
+
+## 3. Box Model
+
+Each HTML element is essentially a box made up of:
+
+- **Content** → the actual text or image inside the element.  
+- **Padding** → space between the content and the border (inside the element).  
+- **Border** → a visible outline surrounding the padding.  
+- **Margin** → space outside the border, separating the element from others.  
+
+**Example:**
+
+```css
+.card {
+  width: 300px;
+  padding: 16px;   /* inside */
+  border: 1px solid #ddd;
+  margin: 12px;    /* outside */
+  box-sizing: border-box;
+}
+```
+---
+
+## 4. Layout Systems: Flexbox and Grid
+
+### Flexbox
+- A one-dimensional layout system (works in either a row or a column).  
+- Useful for navbars, aligning buttons, or inline elements like price and actions in product cards.  
+
+**Example:**
+```css
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+```
+
+### Grid
+- A two-dimensional layout system (rows and columns).
+- Ideal for product listings, galleries, or complex page layouts.
+
+**Example:**
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+```
+
+---
+
+## 4. Implementation Steps:
+
+### Setup & Styling
+- Added Tailwind via CDN and `global.css` for custom form styles.
+- Switched color scheme from green to black/gray for a clean, bold look.
+
+### Product CRUD
+- **create_product:** assigns `product.user = request.user`.
+- **edit_product & delete_product:** restricted to owners only.
+
+### Templates
+- **navbar.html:** responsive navigation with desktop + mobile menu.
+- **card_product.html:** redesigned cards with clickable image, product info, price, and inline buttons.
+
+### Responsive Layout
+- Used Tailwind grid utilities for the product list.
+- Buttons and forms styled with consistent spacing and hover states.
+
+### Ownership Fix
+- Ensured that product actions are limited to the product owner.
+
+---
+
 # **Assignment 4:**
 
 > **Note:** This section contains my work for Assignment 4.  
