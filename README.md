@@ -1,6 +1,95 @@
 # Football Shop
 
 **Deployed Application:** [https://roben-joseph-footballshop.pbp.cs.ui.ac.id]
+---
+
+# **Assignment 6:**
+
+> **Note:** This section contains my work for Assignment 6.  
+> The original Assignment 2, 3, 4 and 5 answers follows after the the assignment 6.
+
+---
+
+# Assignment 6 Questions
+
+---
+
+## 1. What is the difference between a synchronous and an asynchronous request?
+
+Imagine you're at a coffee shop. The way you order can be synchronous or asynchronous.
+
+**Synchronous (The "Blocking" Way):**
+You place your order, and then you must stand at the counter and wait. You can't sit down, check your phone, or talk to friends. The entire process is **blocked** until the barista hands you your coffee. This is how traditional websites work. When you click a link, the browser freezes and waits for the entire new page to be sent from the server before you can do anything else.
+
+**Asynchronous (The "Non-Blocking" Way):**
+You place your order, and the barista hands you a buzzer. You are now free to go sit down, chat, or check your phone. The process is **non-blocking**. When your coffee is ready, the buzzer goes off, and you simply go pick it up. This is how AJAX works. Your browser sends a request in the background, but you can keep scrolling and interacting with the page. When the data arrives, only the part of the page that needs it gets updated, without a full reload.
+
+| Feature | Synchronous | Asynchronous (AJAX) |
+| :--- | :--- | :--- |
+| **User Experience** | Page freezes and waits. | User can continue interacting. |
+| **Process** | Blocking (waits for a task to finish).| Non-blocking (starts a task and moves on). |
+| **Page Reload** | Requires a full page reload for new data. | Updates parts of the page without reloading. |
+
+---
+
+## 2. How does AJAX work in Django (request-response flow)?
+
+AJAX acts as a middleman between your browser (front-end) and your Django server (back-end), allowing them to talk to each other in the background. Here is the step-by-step flow for an action like adding a new product:
+
+1.  **Event Trigger (Browser):** The user fills out the "Add Product" form in a modal and clicks the "Add Product" button. This triggers a JavaScript function.
+
+2.  **`fetch` Request (JavaScript):** The JavaScript function gathers the form data and uses the `fetch()` API to send a `POST` request to a specific URL on the server (e.g., `/create-product-ajax/`).
+
+3.  **URL Routing (Django):** Django's `urls.py` receives the request. It matches the `/create-product-ajax/` path to the `add_product_ajax` view function.
+
+4.  **View Processing (Django):** The `add_product_ajax` function in `views.py` runs. It uses Django's forms to validate the data, sanitizes the inputs for security, and saves the new `Product` object to the database.
+
+5.  **JSON Response (Django):** Instead of rendering a whole new HTML page, the view returns a `JsonResponse`. This is a lightweight text response containing only the necessary information, like `{"status": "success"}` or `{"status": "error"}`.
+
+6.  **Response Handling (JavaScript):** The JavaScript in the browser receives the JSON response. It checks if the status was "success".
+
+7.  **DOM Manipulation (Browser):** If successful, the JavaScript performs several actions without a page reload:
+    * It closes the modal.
+    * It displays a "Success!" toast notification.
+    * It calls another function to re-fetch the product list, which then updates the main page to show the newly added product.
+
+---
+
+## 3. What are the advantages of using AJAX compared to regular rendering in Django?
+
+Using AJAX provides significant benefits over the traditional method of reloading the entire page for every interaction.
+
+-   **Better User Experience (UX):** This is the biggest advantage. The application feels faster, smoother, and more like a modern desktop app. Users don't experience the jarring "flash" of a page reload. Actions like submitting a form or deleting an item provide instant feedback on the same page.
+
+-   **Reduced Bandwidth and Server Load:** With AJAX, only the essential data is exchanged (usually in a small JSON format). In contrast, regular rendering requires the server to send the entire HTML, CSS, and script files again. This efficiency saves data for the user and reduces the processing load on the server.
+
+-   **Increased Interactivity:** AJAX makes it possible to build complex, dynamic features. For example, in our app, we can filter products ("All Products" vs. "My Products") instantly without leaving the page. Other examples include live search results that appear as you type or auto-saving forms.
+
+---
+
+## 4. How do you ensure security when using AJAX for Login and Register features in Django?
+
+Securing AJAX authentication is critical because sensitive data (usernames and passwords) is being transmitted. Here are the key security measures we implemented:
+
+1.  **Server-Side Validation:** We **always** use Django's built-in forms (`AuthenticationForm` for login, `UserCreationForm` for registration) inside our AJAX views. These forms are essential as they handle critical security logic, such as checking for correct passwords, confirming that passwords match, and ensuring usernames aren't already taken. We never trust data sent from the browser without validating it on the server.
+
+2.  **CSRF Protection:** Django has built-in protection against Cross-Site Request Forgery (CSRF), which prevents malicious websites from tricking your users into performing actions they didn't intend. For our AJAX `POST` requests, we used the `@csrf_exempt` decorator for simplicity. In a production environment, the best practice is to include the CSRF token in the headers of the JavaScript `fetch` request.
+
+3.  **Input Sanitization:** To prevent Cross-Site Scripting (XSS) attacks, where an attacker might inject malicious scripts into form fields, we sanitize all user-provided data on the server. We used Django's `strip_tags` function inside our `ProductForm` to remove any HTML tags from the input before it's saved to the database.
+
+4.  **Use HTTPS:** In a live application, all communication must be encrypted using HTTPS (SSL/TLS). This prevents attackers from "sniffing" the network and stealing user credentials as they are sent from the browser to the server.
+
+---
+
+## 5. How does AJAX affect user experience (UX) on websites?
+
+AJAX fundamentally transforms the user experience by making websites feel **fluid, responsive, and uninterrupted.**
+
+-   **Seamless Flow:** Instead of navigating between pages, users stay in one context. For example, when adding a product, the user clicks a button, a modal appears, they submit the form, the modal disappears, and the new product appears on the main list—all without leaving the homepage. This seamless flow keeps the user engaged and focused.
+
+-   **Instant Feedback:** Actions feel immediate. When a user logs in, they don't have to wait for a new page to load to know if they were successful. A toast notification appears instantly, confirming the action. If there's an error, it appears right on the form they are using, allowing them to correct it quickly.
+
+-   **Perceived Speed:** Even if a background task takes a second or two, the application feels faster because the user isn't staring at a blank white screen during a page reload. Showing a loading spinner while data is fetched makes the user feel that the application is working and responsive, which greatly improves their perception of its speed and quality.
 
 ---
 

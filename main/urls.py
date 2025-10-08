@@ -1,35 +1,37 @@
 from django.urls import path
 from main.views import (
     show_main,
-    create_product,
     show_product,
-    show_xml,
-    show_json,
-    show_xml_by_id,
-    show_json_by_id,
-    register,
+    register_user,
     login_user,
     logout_user,
+    get_products_json,
+    add_product_ajax,
     edit_product,
-    delete_product,
+    get_product_by_id_json,
+    delete_product_ajax,
+    login_ajax,
+    register_ajax,
 )
 
 app_name = "main"
 
 urlpatterns = [
-    # Web pages
+    # Page Rendering URLs
     path("", show_main, name="show_main"),
-    path("create-product/", create_product, name="create_product"),
     path("product/<int:id>/", show_product, name="show_product"),
-    path('register/', register, name='register'),
+    path('register/', register_user, name='register'),
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
-    path('product/<int:id>/edit', edit_product, name='edit_product'),
-    path('product/<int:id>/delete', delete_product, name='delete_product'),
 
-    # Data delivery (Assignment 3 requirements)
-    path("xml/", show_xml, name="show_xml"),
-    path("json/", show_json, name="show_json"),
-    path("xml/<int:id>/", show_xml_by_id, name="show_xml_by_id"),
-    path("json/<int:id>/", show_json_by_id, name="show_json_by_id"),
+    # AJAX Endpoints
+    path("get-products/", get_products_json, name="get_products_json"),
+    path("create-product-ajax/", add_product_ajax, name="add_product_ajax"),
+    # Corrected URL pattern for editing
+    path('edit-product/<int:id>/', edit_product, name='edit_product'), 
+    path('get-product/<int:id>/', get_product_by_id_json, name='get_product_by_id_json'),
+    path('delete-product-ajax/<int:id>/', delete_product_ajax, name='delete_product_ajax'),
+    path('login-ajax/', login_ajax, name='login_ajax'),
+    path('register-ajax/', register_ajax, name='register_ajax'),
 ]
+
